@@ -1,5 +1,6 @@
 # Baekjoon-Swift
 
-Baekjoon Site내의 Algorithm 문제 풀이
+Algorithm 문제 풀이
 
-Only Swift
+사이트 : Baekjoon
+사용언어 : Swift
