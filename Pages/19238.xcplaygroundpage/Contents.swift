@@ -90,7 +90,7 @@ for i in 0..<m{
     driver[0] = sortedCustomers2[index].endX
     driver[1] = sortedCustomers2[index].endY
     sortedCustomers2.remove(at: index)
-    if oil < (min+startToEnd) || min == -1{
+    if oil < (min+startToEnd) || min == -1 || startToEnd == -1{
         oil = -1
         break
     }
