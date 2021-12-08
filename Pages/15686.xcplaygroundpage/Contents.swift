@@ -10,16 +10,16 @@ struct Point{
 }
 
 func makePermutation(_ r: Int, _ n: Int) -> Set<Set<Int>>{
-    return permutation([], n, r)
+    return permutation([], n, r,0)
 }
-func permutation(_ arr: Set<Int>, _ n: Int, _ r: Int) -> Set<Set<Int>>{
+func permutation(_ arr: Set<Int>, _ n: Int, _ r: Int, _ start: Int) -> Set<Set<Int>>{
     if arr.count == r{
         return [arr]
     }
     var list = Set<Set<Int>>()
-    for i in 0..<n{
+    for i in start..<n{
         if !arr.contains(i){
-            list = list.union(permutation(arr.union([i]), n, r))
+            list = list.union(permutation(arr.union([i]), n, r, i+1))
         }
     }
     return list
@@ -52,6 +52,7 @@ for per in permutationArr{
             now = now < dis ? now : dis
         }
         min += now
+        if min >= answer { break }
     }
     answer = answer < min ? answer : min
 }
