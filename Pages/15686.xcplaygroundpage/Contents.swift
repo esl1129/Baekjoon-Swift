@@ -56,4 +56,4 @@ for per in permutationArr{
     }
     answer = answer < min ? answer : min
 }
-print(answer)
+print(permutationArr)
