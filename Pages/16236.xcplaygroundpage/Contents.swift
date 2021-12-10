@@ -12,6 +12,7 @@ struct Point: Hashable{
 func isBound(_ xx:Int, _ yy: Int) -> Bool{
     return xx >= 0 && yy >= 0 && xx < N && yy < N
 }
+
 let dx = [-1,0,0,1]
 let dy = [0,-1,1,0]
 
