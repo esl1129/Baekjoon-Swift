@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 struct Point{
     let x: Int
@@ -15,6 +16,9 @@ func CCW(_ p1: Point, _ p2: Point, _ p3: Point) -> Int{
     return a > b ? -1 : 1
 }
 
+func check(_ p1: Point,_ p2: Point,_ p3: Point,_ p4: Point) -> Bool{
+    return p1 == p2 || p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4 || p3 == p4
+}
 
 let line1 = readLine()!.components(separatedBy: " ").map{Int(String($0))!}
 let p1 = Point(line1[0], line1[1])
@@ -27,4 +31,6 @@ let a = CCW(p1, p2, p3)*CCW(p1, p2, p4)
 let b = CCW(p3, p4, p1)*CCW(p3, p4, p2)
 
 let answer = a < 0 && b < 0 ? 1 : 0
+
+if check
 print(answer)
