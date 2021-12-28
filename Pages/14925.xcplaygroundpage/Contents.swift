@@ -1,25 +1,83 @@
 import Foundation
+final class FileIO {
+    private let buffer:[UInt8]
+    private var index: Int = 0
 
-let line = readLine()!.components(separatedBy: " ").map{Int(String($0))!}
-let ROW = line[0]
-let COL = line[1]
-var brd = [[Int]]()
-var sumBrd = [[Int]](repeating: [Int](repeating: 0, count: COL), count: ROW)
+    init(fileHandle: FileHandle = FileHandle.standardInput) {
+        
+        buffer = Array(try! fileHandle.readToEnd()!)+[UInt8(0)] // 인덱스 범위 넘어가는 것 방지
+    }
 
-for i in 0..<ROW{
-    brd.append(readLine()!.components(separatedBy: " ").map{Int(String($0))!})
-    if brd[i][0] == 0 { sumBrd[i][0] = 1 }
-}
-for i in 0..<COL{
-    if brd[0][i] == 0 { sumBrd[0][i] = 1 }
-}
+    @inline(__always) private func read() -> UInt8 {
+        defer { index += 1 }
 
-var max = 0
-for i in 1..<ROW{
-    for j in 1..<COL{
-        if brd[i][j] != 0 { continue }
-        sumBrd[i][j] = [sumBrd[i-1][j],sumBrd[i][j-1],sumBrd[i-1][j-1]].min()!+1
-        max = max > sumBrd[i][j] ? max : sumBrd[i][j]
+        return buffer[index]
+    }
+
+    @inline(__always) func readInt() -> Int {
+        var sum = 0
+        var now = read()
+        var isPositive = true
+
+        while now == 10
+                || now == 32 { now = read() } // 공백과 줄바꿈 무시
+        if now == 45 { isPositive.toggle(); now = read() } // 음수 처리
+        while now >= 48, now <= 57 {
+            sum = sum * 10 + Int(now-48)
+            now = read()
+        }
+
+        return sum * (isPositive ? 1:-1)
+    }
+
+    @inline(__always) func readString() -> String {
+        var now = read()
+
+        while now == 10 || now == 32 { now = read() } // 공백과 줄바꿈 무시
+        let beginIndex = index-1
+
+        while now != 10,
+              now != 32,
+              now != 0 { now = read() }
+
+        return String(bytes: Array(buffer[beginIndex..<(index-1)]), encoding: .ascii)!
+    }
+
+    @inline(__always) func readByteSequenceWithoutSpaceAndLineFeed() -> [UInt8] {
+        var now = read()
+
+        while now == 10 || now == 32 { now = read() } // 공백과 줄바꿈 무시
+        let beginIndex = index-1
+
+        while now != 10,
+              now != 32,
+              now != 0 { now = read() }
+
+        return Array(buffer[beginIndex..<(index-1)])
     }
 }
-print(max)
+
+func solution() -> Int{
+    let fIO = FileIO()
+    let N = fIO.readInt()
+    let M = fIO.readInt()
+    var board = [[Int]](repeating: [Int](repeating: 0, count: M), count: N)
+    var dp = [[Int]](repeating: [Int](repeating: 0, count: M), count: N)
+    
+    for i in 0..<N{
+        for j in 0..<M{
+            let n = fIO.readInt()
+            board[i][j] = n
+            if n == 0 { dp[i][j] = 1}
+        }
+    }
+    for i in 1..<N{
+        for j in 1..<M{
+            if board[i][j] != 0 { continue }
+            dp[i][j] = [dp[i-1][j], dp[i][j-1], dp[i-1][j-1]].min()!+1
+        }
+    }
+    return dp.flatMap{$0}.max()!
+}
+
+print(solution())
