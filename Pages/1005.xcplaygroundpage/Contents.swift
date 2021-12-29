@@ -1,50 +1,101 @@
 import Foundation
+final class FileIO {
+    private let buffer:[UInt8]
+    private var index: Int = 0
+    
+    init(fileHandle: FileHandle = FileHandle.standardInput) {
+        
+        buffer = Array(try! fileHandle.readToEnd()!)+[UInt8(0)] // 인덱스 범위 넘어가는 것 방지
+    }
+    
+    @inline(__always) private func read() -> UInt8 {
+        defer { index += 1 }
+        
+        return buffer[index]
+    }
+    
+    @inline(__always) func readInt() -> Int {
+        var sum = 0
+        var now = read()
+        var isPositive = true
+        
+        while now == 10
+                || now == 32 { now = read() } // 공백과 줄바꿈 무시
+        if now == 45 { isPositive.toggle(); now = read() } // 음수 처리
+        while now >= 48, now <= 57 {
+            sum = sum * 10 + Int(now-48)
+            now = read()
+        }
+        
+        return sum * (isPositive ? 1:-1)
+    }
+    
+    @inline(__always) func readString() -> String {
+        var now = read()
+        
+        while now == 10 || now == 32 { now = read() } // 공백과 줄바꿈 무시
+        let beginIndex = index-1
+        
+        while now != 10,
+              now != 32,
+              now != 0 { now = read() }
+        
+        return String(bytes: Array(buffer[beginIndex..<(index-1)]), encoding: .ascii)!
+    }
+    
+    @inline(__always) func readByteSequenceWithoutSpaceAndLineFeed() -> [UInt8] {
+        var now = read()
+        
+        while now == 10 || now == 32 { now = read() } // 공백과 줄바꿈 무시
+        let beginIndex = index-1
+        
+        while now != 10,
+              now != 32,
+              now != 0 { now = read() }
+        
+        return Array(buffer[beginIndex..<(index-1)])
+    }
+}
 
-var line: [Int] = []
-var N = 0
-var M = 0
-var price: [Int] = []
-var edges: [Int: [Int]] = [:]
-var dp: [Int:Int] = [:]
-func solution(_ start: Int){
-    func DFS(_ start: Int){
-        if edges[start] == nil {
-            dp[start] = price[start]
+let fIO = FileIO()
+
+func solution() -> Int{
+    func DFS(_ n: Int){
+        var max = 0
+        if edges[n] == nil{
+            dp[n] = price[n]
             return
         }
-        for edge in edges[start]!{
-            if dp[edge] == nil {
+        for edge in edges[n]!{
+            if dp[edge] == -1{
                 DFS(edge)
             }
-            if dp[start] == nil{
-                dp[start] = dp[edge]!+price[start]
-            }else if dp[edge]!+price[start] > dp[start]!{
-                dp[start] = dp[edge]!+price[start]
-            }
+            max = max > dp[edge] ? max : dp[edge]
         }
+        dp[n] = price[n]+max
         return
     }
-    DFS(start)
-    print(dp[start]!)
-}
-
-let TC = Int(readLine()!)!
-for _ in 0..<TC{
-    line = readLine()!.components(separatedBy: " ").map{Int(String($0))!}
-    N = line[0]
-    M = line[1]
-    price = [0]+readLine()!.components(separatedBy: " ").map{Int(String($0))!}
-    for _ in 0..<M{
-        let l = readLine()!.components(separatedBy: " ").map{Int(String($0))!}
-        if edges[l[1]] == nil{
-            edges[l[1]] = [l[0]]
+    let N = fIO.readInt()
+    let K = fIO.readInt()
+    var edges: [Int: [Int]] = [:]
+    var price: [Int] = [0]
+    var dp = [Int](repeating: -1, count: N+1)
+    for _ in 0..<N{
+        price.append(fIO.readInt())
+    }
+    for _ in 0..<K{
+        let child = fIO.readInt()
+        let parent = fIO.readInt()
+        if edges[parent] == nil{
+            edges[parent] = [child]
         }else{
-            edges[l[1]]!.append(l[0])
+            edges[parent]!.append(child)
         }
     }
-    let start = Int(readLine()!)!
-    solution(start)
-    edges = [:]
-    dp = [:]
+    let start = fIO.readInt()
+    DFS(start)
+    return dp[start]
 }
-
+for _ in 0..<fIO.readInt(){
+    print(solution())
+}
